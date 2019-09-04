@@ -1,0 +1,1 @@
+Se van a proteger los scripts de creación y modificación de objetos de base de datos.
