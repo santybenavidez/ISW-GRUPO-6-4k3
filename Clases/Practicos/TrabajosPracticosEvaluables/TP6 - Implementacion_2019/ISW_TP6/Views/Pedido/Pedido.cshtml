@@ -1,0 +1,295 @@
+﻿@model ISW_TP6.Models.PedidoModel
+
+@{
+    ViewBag.Title = "Pedido";
+}
+
+<h2>@ViewBag.Title</h2>
+
+
+@using (Html.BeginForm(actionName: "Crear", controllerName: "Pedido"))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div>
+            <h3>Dirección</h3>
+            <hr />
+
+            @* Input Dirección *@
+            <div class="form-group">
+                @Html.LabelFor(model => model.Direccion, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Direccion, new { htmlAttributes = new { @class = "form-control", placeholder = "Calle - Número" } })
+                    @Html.ValidationMessageFor(model => model.Direccion, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            @* DropDownList Ciudades *@
+            <div class="form-group">
+                @Html.LabelFor(model => model.Ciudad, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(model => model.Ciudad, Model.Ciudades, "", new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Ciudad, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            @* Input Referencias *@
+            <div class="form-group">
+                @Html.LabelFor(model => model.Referencias, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Referencias, new { htmlAttributes = new { @class = "form-control", placeholder = "Opcional" } })
+                    @Html.ValidationMessageFor(model => model.Referencias, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <hr />
+            <br />
+        </div>
+
+        <div>
+            <h3>Entrega</h3>
+            <hr />
+
+            @* DropDownList Horarios de entrega*@
+            <div class="form-group">
+                @Html.LabelFor(model => model.Hora, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(model => model.Hora, Model.Horas, "", new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Hora, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <hr />
+            <br />
+        </div>
+
+        <div>
+            <h3>Medio de pago</h3>
+            <hr />
+            @* DropDownList Formas de Pago*@
+            <div class="form-group">
+                @Html.LabelFor(model => model.FormaPago, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(model => model.FormaPago, Model.FormasPago, "", new { @class = "form-control", @onChange = "javascript:MostrarDatosPago(this);" })
+                    @Html.ValidationMessageFor(model => model.FormaPago, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            @* Input Número de Tarjeta *@
+            <div class="row form-group" id="divNumeroTarjeta" name="divNumeroTarjeta" hidden>
+                @Html.LabelFor(model => model.NumeroTarjeta, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-4">
+                    @Html.EditorFor(model => model.NumeroTarjeta, new { htmlAttributes = new { @class = "form-control", placeholder = "XXXX XXXX XXXX XXXX" } })
+                    @Html.ValidationMessageFor(model => model.NumeroTarjeta, "", new { @class = "text-danger" })
+                </div>
+
+                @* Botón validar tarjeta *@
+                <input type="button" value="Validar" class="btn btn-info col-md-1" id="btnValidar" name="btnValidar" onclick="javascript:ValidarTarjeta()"/>
+            </div>
+
+            @* Datos de la tarjeta de crédito *@
+            <div id="divDatosTarjeta" name="divDatosTarjeta" hidden>
+
+                <div class="row form-group">
+
+                    @* Input Nombre del titular de la tarjeta *@
+                    @Html.LabelFor(model => model.TitularTarjeta, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.TitularTarjeta, new { htmlAttributes = new { @class = "form-control", placeholder = "Nombre del Titular" } })
+                        @Html.ValidationMessageFor(model => model.TitularTarjeta, "", new { @class = "text-danger" })
+                    </div>
+
+                    @* Input Vencimiento de la tarjeta *@
+                    @Html.LabelFor(model => model.VencimientoTarjeta, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.VencimientoTarjeta, new { htmlAttributes = new { @class = "form-control", placeholder = "MM/AA" } })
+                        @Html.ValidationMessageFor(model => model.VencimientoTarjeta, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+
+                @* Input Código de seguridad de la tarjeta *@
+                <div class="row form-group">
+                    @Html.LabelFor(model => model.CodSeguridadTarjeta, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.CodSeguridadTarjeta, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.CodSeguridadTarjeta, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+            </div>
+
+            @* Input Monto a pagar en efectivo *@
+            <div class="form-group" id="divDatosEfectivo" name="divDatosEfectivo" hidden>
+                @Html.LabelFor(model => model.MontoEfectivo, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.MontoEfectivo, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.MontoEfectivo, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <hr />
+            <br />
+        </div>
+
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Confirmar" class="btn btn-info" />
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script type="text/javascript">
+        function MostrarDatosPago(ddlFormaPago) {
+            try {
+                if (ddlFormaPago.selectedOptions[0].value === "1") {
+                    // Se seleccionó efectivo
+                    $("#divDatosEfectivo").show();
+                    $("#divNumeroTarjeta").hide();
+                    $("#divDatosTarjeta").hide();
+
+                    // Defino los campos requeridos
+                    $("#divDatosEfectivo input").attr("required", "required");
+                    $("#divNumeroTarjeta input").removeAttr("required");
+                    $("#divDatosTarjeta input").removeAttr("required");
+
+                } else if (ddlFormaPago.selectedOptions[0].value === "2") {
+                    // Se seleccionó tarjeta
+                    $("#divNumeroTarjeta").show();
+                    $("#divDatosEfectivo").hide();
+
+
+                    // Defino los campos requeridos
+                    $("#divDatosEfectivo input").removeAttr("required");
+                    $("#divNumeroTarjeta input").attr("required", "required");
+                    $("#divDatosTarjeta input").attr("required", "required");
+
+                }
+                else
+                {
+                    // No se seleccionó nada.¿
+                    $("#divDatosEfectivo").hide();
+                    $("#divNumeroTarjeta").hide();
+                    $("#divDatosTarjeta").hide();
+
+                    // Defino los campos requeridos
+                    $("#divDatosEfectivo input").removeAttr("required");
+                    $("#divNumeroTarjeta input").removeAttr("required");
+                    $("#divDatosTarjeta input").removeAttr("required");
+                }
+            }
+            catch (error) {
+                alert(error.message);
+                console.log("Error al seleccionar forma de pago. " + error.message);
+            }
+        }
+
+        function ValidarTarjeta() {
+            var sNumeroTarjeta;
+            var sPrimerDigito;
+            try {
+                sNumeroTarjeta = $("#NumeroTarjeta").val();
+                sPrimerDigito = sNumeroTarjeta.charAt(0);
+
+                // Valido la cantidad de dígitos ingresados
+                if (sNumeroTarjeta.length === 16) {
+
+                    // Valido que la tarjeta sea Visa
+                    if (sPrimerDigito === "4") {
+
+
+
+                        // Verifico que el número sea válido
+                        if (ValidarNumeroTarjeta(sNumeroTarjeta)) {
+
+                            $("#NumeroTarjeta").prop('disabled', true);
+                            $("#btnValidar").prop('disabled', true);
+                            $("#divDatosTarjeta").show();
+
+                        } else {
+                            alert("El número ingresado no corresponde a una tarjeta de crédito válida.");
+                        }
+
+                    } else {
+                        alert("Solamente se puede realizar el pago con tarjetas VISA.");
+                    }
+
+                } else {
+                    alert("El número de tarjeta debe tener 16 dígitos de largo.");
+                }
+
+
+            } catch (error) {
+                alert(error.message);
+                console.log("Error al validar Tarjeta de Crédito. " + error.message);
+            }
+        }
+
+        function ValidarNumeroTarjeta(sNumeroTarjeta) {
+            var aCaracteresImpares = [];
+            var aCaracteresPares = [];
+            var iNumeroTarjetaLength;
+            var iCarateresImparesLength;
+            var iResultado = 0;
+
+            try {
+
+                // Guardo el largo de la cadena en una variable para no calcularlo en cada ciclo.
+                iNumeroTarjetaLength = sNumeroTarjeta.length;
+
+                // Separo los caracteres en posiciones pares en un array y los que están en posiciones impares en otro array.
+                for (let i = 1; i <= iNumeroTarjetaLength; i++) {
+                    if ((i % 2) === 0) {
+                        aCaracteresPares.push(parseInt(sNumeroTarjeta.charAt(i - 1)));
+                    } else {
+                        aCaracteresImpares.push(parseInt(sNumeroTarjeta.charAt(i - 1)));
+                    }
+                }
+
+                iCarateresImparesLength = aCaracteresImpares.length;
+
+                // Duplico cada número del array de posiciones impares.
+                // Si el resultado es mayor o igual a 10, sumo las cifras del número.
+                for (let i = 0; i < iCarateresImparesLength; i++) {
+                    aCaracteresImpares[i] = aCaracteresImpares[i] * 2;
+
+                    if (aCaracteresImpares[i] >= 10) {
+                        let iPrimerCifra = parseInt(aCaracteresImpares[i].toString().charAt(0));
+                        let iSegundaCifra = parseInt(aCaracteresImpares[i].toString().charAt(1));
+
+                        aCaracteresImpares[i] = iPrimerCifra + iSegundaCifra;
+                    }
+                }
+
+                // Sumo todos los dígitos de ambos arrays y acumulo en la variable iResultado
+                aCaracteresImpares.forEach(function (element) {
+                    iResultado += element;
+                });
+
+                aCaracteresPares.forEach(function (element) {
+                    iResultado += element;
+                });
+
+                if ((iResultado % 10) === 0)
+                    return true;
+                else
+                    return false;
+
+            } catch (error) {
+                alert(error.message);
+                console.log("Error al validar el número de Tarjeta de Crédito. " + error.message);
+            }
+        }
+
+    </script>
+}
